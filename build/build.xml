@@ -1,0 +1,45 @@
+<project name="distro.build" default="build" basedir="./" xmlns:antcontrib="antlib:net.sf.antcontrib">
+
+  <loadproperties srcfile="build.properties" />
+  <import file="${cfdistro.build.file}" />
+
+  <path id="regexfilter.lib.path">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+
+  <target name="build" depends="build.jar">
+  </target>
+
+  <target name="build.compile">
+    <delete dir="${lib.dir}"/>
+    <mkdir dir="${lib.dir}"/>
+    <dependency groupId="javax.servlet" artifactId="javax.servlet-api" version="3.0.1" dest="${lib.dir}"
+      type="jar" />
+    <delete dir="${bin.dir}" />
+    <mkdir dir="${bin.dir}" />
+    <javac-ecj srcdir="${src.dir}/java/" destdir="${bin.dir}" classpath="${toString:regexfilter.lib.path}"
+      compliance="1.7" />
+  </target>
+
+  <target name="build.jar" depends="build.compile">
+    <copy todir="${debrepo.bin.dir}/org/cfmlprojects/regexpathinfofilter" file="${src.dir}/java/org/cfmlprojects/regexpathinfofilter/version.properties">
+      <filterchain>
+        <expandproperties />
+        <deletecharacters chars="\n" />
+        <trim />
+        <ignoreblank />
+      </filterchain>
+    </copy>
+    <delete file="${regexpathinfofilter.jar.file}" />
+    <jar destfile="${regexpathinfofilter.jar.file}" basedir="${bin.dir}" />
+  </target>
+
+
+  <target name="build.mvn" depends="build.jar">
+    <pom-and-deploy pomid="regexpathinfofilter.pom" packaging="jar" artifact="${regexpathinfofilter.jar.file}"
+      groupId="org.cfmlprojects" artifactId="regexpathinfofilter" version="${regexpathinfofilter.version}" name="regexpathinfofilter" />
+  </target>
+
+</project>
