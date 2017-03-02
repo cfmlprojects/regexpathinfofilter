@@ -19,21 +19,20 @@ import javax.servlet.http.HttpServletRequestWrapper;
 public class RegexPathInfoFilter implements Filter {
 
     private static Pattern regex;
-    private static Matcher matcher;
     private static final String REGEX_DEFAULT = "^(/.+\\.cf[cm])(/.*)";
-    private static Logger logger = Logger.getLogger("org.cfmlprojects.regexpathinfofilter");
+    private static final Logger logger = Logger.getLogger(RegexPathInfoFilter.class.getName());
 
     @Override
     public void init(FilterConfig config) throws ServletException {
         final String regexString = config.getInitParameter("regex") != null ? config.getInitParameter("regex") : REGEX_DEFAULT;
         regex = Pattern.compile(regexString);
-        matcher = regex.matcher("");
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws ServletException, IOException {
         final String requestURI = ((HttpServletRequest)req).getRequestURI();
-        if (matcher.reset(requestURI).matches()) {
+        final Matcher matcher = regex.matcher(requestURI);
+        if (matcher.matches()) {
             final String newURL = matcher.group(1);
             final String path_info = matcher.group(2);
             logger.log(Level.FINE,requestURI + " matches " + REGEX_DEFAULT + " regex, now: " + newURL + " path_info: " + path_info);
